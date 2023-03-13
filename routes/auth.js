@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const CryptoJS = require('crypto-js');
-const User = require('../models/User');
 const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 //REGISTER
 router.post('/register', async (req, res) => {
   const newUser = new User({
@@ -44,10 +44,26 @@ router.post('/login', async (req, res) => {
       });
     }
     // const token = user.generateAuthToken();
+    // const token1 = jwt.sign({ _id: user._id }, process.env.JWT_SEC);
+    // res.status(200).json({
+    //   message: 'User logged in successfully',
+    //   data: { token },
+    // });
+
+    const accessToken = jwt.sign(
+      {
+        id: user._id,
+        isAdmin: user.isAdmin,
+      },
+      process.env.jWT_SEC,
+      { expiresIn: '2d' }
+    );
+
     const { password, ...others } = user._doc;
     res.status(200).json({
       message: 'User logged in successfully',
-      data: { others },
+
+      data: { ...others, accessToken },
     });
   } catch (err) {
     console.log(err);
@@ -56,4 +72,5 @@ router.post('/login', async (req, res) => {
     });
   }
 });
+//
 module.exports = router;
